@@ -21,4 +21,13 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 ## Changelog
 
 2017-12-17:  
-   * Initial release to new repository.  
+   * Initial release to new repository. 
+2017-12-18:	 
+	* DAC A cos, DAC B sin in TX.  
+2017-12-23:  
+	* Coded a digital, band pass, roofing filter between ADC and downmix/decimation. Currently running at 100 MHz, seems a bit too fast. Scaling probably not correct. Bypassed! 
+	Verkar inte filtrera.  
+	Skippa roofing och gör bättre decimeringsfilter, klockat i 120 MHz etc. För 625 ksps och 78 ksps, 25 kHz LPF.  
+	
+	
+	

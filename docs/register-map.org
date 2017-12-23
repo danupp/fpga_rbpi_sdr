@@ -62,8 +62,8 @@ Variable values are explained in the table further down.
 | tx:               | 1: Forced TX, 0: RX or TX when PTT pin low                                                        |
 | key:              | 1: Forced CW key, 0: Controlled by KEY pin                                                        |
 | tx_att[1..0]:    | TX attenuation in steps of 6dB, 00: Full TX power                                                  |
-| rx_att[1..0]:    | RX attenuation in steps of 6dB, 00: Full RX gain          						|
-| if_freq[2..0:    | 001: IF=45MHz, 010: IF=21.4MHz         								|
+| rx_att[1..0]:    | RX attenuation in steps of 6dB, 00: Full RX gain          														|
+| if_freq[2..0:    | 001: IF=45MHz, 010: IF=21.4MHz         																				|
 | freq[24..0]:      | Carrier frequency, in steps of 120e6/2^25 Hz                                                      |
 | audio gain[5..0]: | Speaker audio attenuation, 011111 = mute, 000000 = 0dB, MSB always 0 (see TLV320AIC20K datasheet) |
 
@@ -85,7 +85,7 @@ Simply transmit [0x00 0x00 0x00 0x00 0x00] to read without altering any register
 
 
 | Bit nr |          |                                      |                                       
-|--------+----------+--------------------------------------+
+|--------+----------+--------------------------------------|
 |      7 | TX/RX    | 1: TX, 0: RX – For TX/RX indication  |
 |      6 | N/A	    | 							                 |
 |      5 | N/A     |                                       |

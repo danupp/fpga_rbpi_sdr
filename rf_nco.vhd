@@ -117,29 +117,32 @@ entity rf_nco is
 end rf_nco;
 
 architecture nco_arch of rf_nco is
-signal regA, regA_buff : std_logic_vector(24 downto 0);
-signal regB, regB_buff : std_logic_vector(24 downto 0);
+signal regRFLO : std_logic_vector(24 downto 0);
+signal regIFLO : std_logic_vector(24 downto 0);
+--signal regA, regA_buff : std_logic_vector(24 downto 0);
+--signal regB, regB_buff : std_logic_vector(24 downto 0);
 signal sign_A, sign_B, sign_A_r, sign_B_r, sign_A_rr, sign_B_rr : std_logic;
 
 begin
 
-	acc_A : process(A_clk)
+	acc_A : process(A_clk)   
 	
 	begin
 		if A_clk'event and A_clk = '1' then
-			regA <= std_logic_vector(unsigned(regA) + unsigned(freq));
+			regRFLO <= std_logic_vector(unsigned(regRFLO) + unsigned(freq));
+			--regA <= std_logic_vector(unsigned(regA) + unsigned(freq));
 			--regA_buff <= regA;
-			if regA(24 downto 23) = "00" then
-				ADDR_A <= regA(22 downto 11);
+			if regRFLO(24 downto 23) = "00" then    -- cos
+				ADDR_A <= regRFLO(22 downto 11);
 				sign_A <= '1';
-			elsif regA(24 downto 23) = "01" then
-				ADDR_A <= std_logic_vector(4095 - regA(22 downto 11));
+			elsif regRFLO(24 downto 23) = "01" then
+				ADDR_A <= std_logic_vector(4095 - regRFLO(22 downto 11));
 				sign_A <= '0';
-			elsif regA(24 downto 23) = "10" then
-				ADDR_A <= regA(22 downto 11);
+			elsif regRFLO(24 downto 23) = "10" then
+				ADDR_A <= regRFLO(22 downto 11);
 				sign_A <= '0';
-			elsif regA(24 downto 23) = "11" then
-				ADDR_A <= std_logic_vector(4095 - regA(22 downto 11));
+			elsif regRFLO(24 downto 23) = "11" then
+				ADDR_A <= std_logic_vector(4095 - regRFLO(22 downto 11));
 				sign_A <= '1';
 			end if;
 		end if;	
@@ -150,26 +153,44 @@ begin
 	
 	begin
 		if B_clk'event and B_clk = '1' then
-			if tx = '1' then
-				addnum_B := unsigned(freq);
+			--if tx = '1' then
+				--addnum_B := unsigned(freq);
+			--else
+				--addnum_B := to_unsigned(12495531,25);   -- 45.00000 MHz - 312.5 kHz Hz
+			--end if;
+			if tx = '0' then
+				regIFLO <= std_logic_vector(unsigned(regIFLO) + to_unsigned(12495531,25));
+				if regIFLO(24 downto 23) = "00" then   
+					ADDR_B <= regIFLO(22 downto 11);
+					sign_B <= '1';
+				elsif regIFLO(24 downto 23) = "01" then 
+					ADDR_B <= std_logic_vector(4095 - regIFLO(22 downto 11));
+					sign_B <= '0';
+				elsif regIFLO(24 downto 23) = "10" then
+					ADDR_B <= regIFLO(22 downto 11);
+					sign_B <= '0';
+				elsif regIFLO(24 downto 23) = "11" then
+					ADDR_B <= std_logic_vector(4095 - regIFLO(22 downto 11));
+					sign_B <= '1';
+				end if;
 			else
-				addnum_B := to_unsigned(12495531,25);   -- 45.00000 MHz - 312.5 kHz Hz
+				if regRFLO(24 downto 23) = "11" then  
+					ADDR_B <= regRFLO(22 downto 11);
+					sign_B <= '1';
+				elsif regRFLO(24 downto 23) = "00" then  -- sin
+					ADDR_B <= std_logic_vector(4095 - regRFLO(22 downto 11));
+					sign_B <= '0';
+				elsif regRFLO(24 downto 23) = "01" then
+					ADDR_B <= regRFLO(22 downto 11);
+					sign_B <= '0';
+				elsif regRFLO(24 downto 23) = "10" then
+					ADDR_B <= std_logic_vector(4095 - regRFLO(22 downto 11));
+					sign_B <= '1';
+				end if;
 			end if;
-			regB <= std_logic_vector(unsigned(regB) + addnum_B);
-			regB_buff <= regB;
-			if regB_buff(24 downto 23) = "00" then
-				ADDR_B <= regB_buff(22 downto 11);
-				sign_B <= '1';
-			elsif regB_buff(24 downto 23) = "01" then
-				ADDR_B <= std_logic_vector(4095 - regB_buff(22 downto 11));
-				sign_B <= '0';
-			elsif regB_buff(24 downto 23) = "10" then
-				ADDR_B <= regB_buff(22 downto 11);
-				sign_B <= '0';
-			elsif regB_buff(24 downto 23) = "11" then
-				ADDR_B <= std_logic_vector(4095 - regB_buff(22 downto 11));
-				sign_B <= '1';
-			end if;
+			--regB <= std_logic_vector(unsigned(regB) + addnum_B);
+			--regB_buff <= regB;
+			
 		end if;	
 	end process;
 	

@@ -30,6 +30,7 @@ create_clock -name POR_clk -period 100000.000 -waveform { 0.000 50000.000 } [get
 #**************************************************************
 
 create_generated_clock -name clk240 -source [get_ports {clk_tcxo}] -multiply_by 12 [get_pins {inst2|altpll_component|auto_generated|pll1|clk[0]}]
+create_generated_clock -name clk100 -source [get_ports {clk_tcxo}] -multiply_by 5 [get_pins {inst2|altpll_component|auto_generated|pll1|clk[1]}]
 create_generated_clock -name A_clk_DAC -source [get_ports {clk_tcxo}] -multiply_by 6 [get_nets {inst3|A_clk}]
 create_generated_clock -name B_clk_DAC -source [get_ports {clk_tcxo}] -multiply_by 6 [get_nets {inst3|B_clk}]
 

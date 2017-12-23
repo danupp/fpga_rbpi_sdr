@@ -199,7 +199,7 @@ constant filtkoeff : filt_type :=
 --attribute ramstyle of filtkoeff : constant is "M4K";
 
 signal sample : boolean := false;
-signal ack : boolean := false;
+signal sampled : boolean := false;
 
 signal I_asynch,Q_asynch, I_synch, Q_synch : signed (23 downto 0);
 
@@ -209,6 +209,8 @@ signal mac_Q : signed (60 downto 0);
 signal write_pointer, write_pointer_last : integer range 0 to 255 := 200;
 signal read_pointer : integer range 0 to 255;
 signal clk_out_next : boolean := false;
+
+signal inbuffer : signed(23 downto 0);
 	
 begin
 
@@ -223,17 +225,18 @@ downconversion : process (clk_in)
 			end if;
 
 			if sample = true then
-				ack <= true;
+				sampled <= true;			
+			elsif sampled = true then
 				if ns = 0 then
-					Ia(write_pointer) <= signed(Data_in);  				-- 1
+					Ia(write_pointer) <= inbuffer;  				-- 1
 					Qa(write_pointer) <= to_signed(0,24); 		-- 0
 					ns := 1;
 				elsif ns = 1 then
 					Ia(write_pointer) <= to_signed(0,24);		-- 0
-					Qa(write_pointer) <= signed(Data_in);			-- 1
+					Qa(write_pointer) <= inbuffer;			-- 1
 					ns := 2;
 				elsif ns = 2 then
-					Ia(write_pointer) <= (not signed(Data_in)) + 1; -- -1
+					Ia(write_pointer) <= (not inbuffer) + 1; -- -1
 					Qa(write_pointer) <= to_signed(0,24); 	 -- 0
 					ns := 3;
 				elsif ns = 3 then
@@ -242,8 +245,7 @@ downconversion : process (clk_in)
 					ns := 0;
 				end if;		
 				write_pointer_last <= write_pointer;
-			else
-				ack <= false;
+				sampled <= false;
 			end if;
 			I_asynch <= Ia(read_pointer);
 			Q_asynch <= Qa(read_pointer);
@@ -262,7 +264,7 @@ filter : process (clk_in)
 
 	begin	
 		if clk_in'event and clk_in = '0' then
-			if ack = true then	
+			if sampled = true then	
 				if write_pointer = 0 or write_pointer > 200 then
 					write_pointer <= 200;
 				else
@@ -329,13 +331,16 @@ filter : process (clk_in)
 		end if;
 	end process;
 	
-	sample_ff : process(clk_sample,ack)
+	
+	sample_ff : process(clk_sample, sampled)
 	begin
-		if ack = true then
+		if sampled = true then
 			sample <= false;
 		elsif clk_sample'event and clk_sample = '1' then
+			inbuffer <= signed(data_in);
 			sample <= true;
 		end if;
 	end process;
+	
 	
 end down_dec_arch;
