@@ -42,7 +42,7 @@ type regdata is array (0 to 1) of std_logic_vector (15 downto 0);
 
 constant init_regdata : regdata := 
 			("0000000000100010", -- reg 2
-			 "0000000000011001"); -- reg 1  1.25MSPS
+			 "0000000000011010"); -- reg 1  0.625MSPS
 constant reg_addr : regdata := 
 			(x"0002", -- reg 2
 			 x"0001"); -- reg 1

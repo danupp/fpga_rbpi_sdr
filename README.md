@@ -25,9 +25,13 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 2017-12-18:	 
 	* DAC A cos, DAC B sin in TX.  
 2017-12-23:  
-	* Coded a digital, band pass, roofing filter between ADC and downmix/decimation. Currently running at 100 MHz, seems a bit too fast. Scaling probably not correct. Bypassed! 
-	Verkar inte filtrera.  
-	Skippa roofing och gör bättre decimeringsfilter, klockat i 120 MHz etc. För 625 ksps och 78 ksps, 25 kHz LPF.  
+	* Coded a digital, band pass, roofing filter between ADC and downmix/decimation. Currently running at 100 MHz, seems a bit too fast. Scaling probably not correct. Bypassed!  
+2017-12-26:  	
+	* Removed roofing filter.
+	* Changed to 625 ksps output from ADC.
+	* Changed decimation to 8, giving 78.125 ksps. Implemented 640 taps Chebyshev low pass decimation filter, running at 60 MHz.
+2017-12-28:
+   * Changed decimation filter to hanning type. But seems to cut off at 50 kHz when designed for 25 kHz fc.
 	
 	
 	

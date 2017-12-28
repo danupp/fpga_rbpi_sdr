@@ -159,7 +159,7 @@ begin
 				--addnum_B := to_unsigned(12495531,25);   -- 45.00000 MHz - 312.5 kHz Hz
 			--end if;
 			if tx = '0' then
-				regIFLO <= std_logic_vector(unsigned(regIFLO) + to_unsigned(12495531,25));
+				regIFLO <= std_logic_vector(unsigned(regIFLO) + to_unsigned(12539221,25));  -- 45 MHz - 156.25 kHz
 				if regIFLO(24 downto 23) = "00" then   
 					ADDR_B <= regIFLO(22 downto 11);
 					sign_B <= '1';

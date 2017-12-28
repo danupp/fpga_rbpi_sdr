@@ -27,7 +27,7 @@ signal clockdiv : unsigned(3 downto 0);
 begin
 
 	dout <= data_reg_2(31);
-	bclk <= clockdiv(2);
+	bclk <= clockdiv(1);
 	
 	clockdivider : process(clk0)
 	begin
