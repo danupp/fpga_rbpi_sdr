@@ -31,7 +31,9 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 	* Changed to 625 ksps output from ADC.
 	* Changed decimation to 8, giving 78.125 ksps. Implemented 640 taps Chebyshev low pass decimation filter, running at 60 MHz.
 2017-12-28:
-   * Changed decimation filter to hanning type. But seems to cut off at 50 kHz when designed for 25 kHz fc.
+   * Changed decimation filter to hanning type. But does not work properly.
+2018-01-02:  
+	* Fixed decimation filter problem.  
 	
 	
 	

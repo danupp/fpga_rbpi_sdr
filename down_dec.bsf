@@ -73,6 +73,13 @@ agreement for further details.
 		(text "clk_out" (rect 183 59 211 71)(font "Arial" ))
 		(line (pt 232 64)(pt 216 64)(line_width 1))
 	)
+	(port
+		(pt 232 80)
+		(output)
+		(text "deb" (rect 0 0 14 12)(font "Arial" ))
+		(text "deb" (rect 197 75 211 87)(font "Arial" ))
+		(line (pt 232 80)(pt 216 80)(line_width 1))
+	)
 	(drawing
 		(rectangle (rect 16 16 216 96)(line_width 1))
 	)

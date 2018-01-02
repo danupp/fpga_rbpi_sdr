@@ -68,10 +68,6 @@
 					"strict" : false
 				},
 				{
-					"name" : "GPIO2",
-					"strict" : false
-				},
-				{
 					"name" : "DAC_DATABUS[13]",
 					"strict" : false
 				},
