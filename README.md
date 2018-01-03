@@ -21,19 +21,22 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 ## Changelog
 
 2017-12-17:  
-   * Initial release to new repository. 
+   * Initial release to new repository.  
 2017-12-18:	 
 	* DAC A cos, DAC B sin in TX.  
 2017-12-23:  
 	* Coded a digital, band pass, roofing filter between ADC and downmix/decimation. Currently running at 100 MHz, seems a bit too fast. Scaling probably not correct. Bypassed!  
-2017-12-26:  	
-	* Removed roofing filter.
-	* Changed to 625 ksps output from ADC.
-	* Changed decimation to 8, giving 78.125 ksps. Implemented 640 taps Chebyshev low pass decimation filter, running at 60 MHz.
-2017-12-28:
-   * Changed decimation filter to hanning type. But does not work properly.
+2017-12-26:  
+	* Removed roofing filter.  
+	* Changed to 625 ksps output from ADC.  
+	* Changed decimation to 8, giving 78.125 ksps. Implemented 640 taps Chebyshev low pass decimation filter, running at 60 MHz.  
+2017-12-28:  
+   * Changed decimation filter to hanning type. But does not work properly.  
 2018-01-02:  
-	* Fixed decimation filter problem.  
+	* Fixed decimation filter problem.
+2018-01-03:  
+   * Fixed another decimation filter problem. TODO: Reduce memory for buffers and make room for more taps by taking advantage of every second sample being zero after downconversion.  
+	
 	
 	
 	
