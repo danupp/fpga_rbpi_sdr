@@ -17,11 +17,12 @@ end down_dec;
 
 architecture down_dec_arch of down_dec is
 	
-type longbuffer is array (0 to 659) of signed (23 downto 0);
+type longbuffer is array (0 to 359) of signed (23 downto 0);
 type filt_type is array (0 to 319) of signed (23 downto 0);
 
 signal Ia : longbuffer;
 signal Qa : longbuffer;
+--signal IQ : longbuffer;
 
 
 constant filtkoeff : filt_type :=
@@ -29,6 +30,7 @@ constant filtkoeff : filt_type :=
 -- Scilab:
 -->[v,a,f] = wfir ('lp', 640, [25/625 0], 'kr', 20);
 --> round(v*2^26)
+
 	("000000000000000000000000",
     "000000000000000000000000",
     "000000000000000000000000",
@@ -688,13 +690,12 @@ signal sampled : boolean := false;
 signal I_asynch, Q_asynch : signed (23 downto 0);
 
 signal filtk : signed(23 downto 0);
-signal prod_I : signed (47 downto 0);
-signal prod_Q : signed (47 downto 0);
+signal prod : signed (47 downto 0);
 signal mac_I : signed (65 downto 0);
 signal mac_Q : signed (65 downto 0);
-
-signal write_pointer, write_pointer_last : integer range 0 to 659 := 0;
-signal read_pointer : integer range 0 to 659;
+signal sample_data : signed(23 downto 0);
+	
+signal read_pointer_I, read_pointer_Q : integer range 0 to 359;
 signal clk_out_next : boolean := false;
 
 signal inbuffer : std_logic_vector(23 downto 0);
@@ -712,11 +713,18 @@ sample_ff : process(clk_sample, sampled)
 	end process;
 	
 	
-I_asynch <= Ia(read_pointer);
-Q_asynch <= Qa(read_pointer);
+I_asynch <= Ia(read_pointer_I);
+Q_asynch <= Qa(read_pointer_Q);
+--IQ_asynch <= IQ(read_pointer);
 			
 downconversion : process (clk_in)
-	variable ns : integer range 0 to 3 := 0;	
+	variable n : integer range -1 to 659;
+	variable ns : integer range 0 to 2;
+	variable nn : integer range 0 to 319;
+	variable m : integer range 0 to 8 := 0;
+	variable p : integer range 0 to 800;
+	variable write_pointer, write_pointer_last : integer range 0 to 359 := 0;
+	
 	begin	
 		if clk_in'event and clk_in = '1' then		
 			if clk_out_next = true then
@@ -728,72 +736,95 @@ downconversion : process (clk_in)
 			if sample = true then
 				sampled <= true;			
 			elsif sampled = true then
-				if ns = 0 then
-					Ia(write_pointer) <= signed(inbuffer);  				-- 1
-					Qa(write_pointer) <= to_signed(0,24); 		-- 0
-					ns := 1;
-				elsif ns = 1 then
-					Ia(write_pointer) <= to_signed(0,24);		-- 0
-					Qa(write_pointer) <= signed(inbuffer);			-- 1
-					ns := 2;
-				elsif ns = 2 then
-					Ia(write_pointer) <= signed(not inbuffer) + 1; -- -1
-					Qa(write_pointer) <= to_signed(0,24); 	 -- 0
-					ns := 3;
-				elsif ns = 3 then
-					Ia(write_pointer) <= to_signed(0,24);		-- 0
-					Qa(write_pointer) <= signed(not inbuffer) + 1; -- -1
-					ns := 0;
-				end if;		
-				write_pointer_last <= write_pointer;
 				sampled <= false;
-				if write_pointer = 0 then
-					write_pointer <= 659;
-				else
-					write_pointer <= write_pointer - 1;
-				end if;	
-			end if;
-		end if;
-	end process;
-	
-	
-			
-filter : process (clk_in)
-	variable n : integer range 0 to 659 := 0;
-	variable nn : integer range 0 to 319;
-	variable m : integer range 0 to 8 := 0;
-	variable filter_start_pointer : integer range 0 to 659;
-	variable p : integer range 0 to 1500;
-
-	begin	
-		if clk_in'event and clk_in = '1' then
-			if sampled = true then		
-				if m = 7 then  -- start filtering every 8 samples
-					clk_out_next <= true;
-					filter_start_pointer := write_pointer_last;
-					m := 0;    -- written samples
-					n := 0;	  -- multiplication steps									
-				else
-					clk_out_next <= false;
+				if m = 0 or m = 4 then
+					Ia(write_pointer) <= signed(inbuffer);  				-- 1
+					--Qa(write_pointer) <= to_signed(0,24); 		-- 0
 					m := m + 1;
+				elsif m = 1 or m = 5 then
+					--Ia(write_pointer) <= to_signed(0,24);		-- 0
+					Qa(write_pointer) <= signed(inbuffer);			-- 1
+					m := m + 1;
+					clk_out_next <= false;
+				elsif m = 2 or m = 6 then
+					Ia(write_pointer) <= signed(not inbuffer) + 1; -- -1
+					--Qa(write_pointer) <= to_signed(0,24); 	 -- 0
+					m := m + 1;
+				elsif m = 3 or m = 7 then
+					--Ia(write_pointer) <= to_signed(0,24);		-- 0
+					Qa(write_pointer) <= signed(not inbuffer) + 1; -- -1
+					if m = 3 then
+						m := m + 1;
+					elsif m = 7 then  -- clock out and start filter
+						clk_out_next <= true;
+						m := 0;    -- written samples
+						n := -1;	  -- filter multiplication steps	
+						ns := 2;	  
+						prod <= to_signed(0,48);
+						mac_I <= to_signed(0,66);
+						mac_Q <= to_signed(0,66);	
+						
+						p := write_pointer_last;
+						if p > 359 then
+							read_pointer_I <= p - 360;
+							read_pointer_Q <= p - 360;
+						else
+							read_pointer_I <= p;
+							read_pointer_Q <= p;
+						end if;
+					end if;
 				end if;
-			elsif n = 0 then
-				prod_I <= to_signed(0,48);
-				prod_Q <= to_signed(0,48);	
-				mac_I <= to_signed(0,66);
-				mac_Q <= to_signed(0,66);	
-				filtk <= filtkoeff(0);
-				n := 1;
+				
+				if m = 0 or m = 2 or m = 4 or m = 6 then	--- these are new m's		
+					write_pointer_last := write_pointer;
+					if write_pointer = 0 then
+						write_pointer := 359;
+					else
+						write_pointer := write_pointer - 1;
+					end if;
+				end if;	
 			else
-				if n < 640 then
-					if n < 320 then
-						nn := n;   -- nn = 1 to 319
+				if n > -1 and n < 641 then
+					if ns = 0 then  -- filtk and sample now for Q - compute prod for Q, prod now is for I
+						sample_data <= I_asynch;
+						mac_I <= mac_I + prod;
+						p := read_pointer_Q + 1;
+						if p > 359 then
+								read_pointer_Q <= p - 360;
+						else
+							read_pointer_Q <= p;
+						end if;
+						ns := 1;
+					elsif ns = 1 then
+						sample_data <= Q_asynch;
+						mac_Q <= mac_Q + prod;
+						p := read_pointer_I + 1;
+						if p > 359 then
+							read_pointer_I <= p - 360;
+						else
+							read_pointer_I <= p;
+						end if;
+						ns := 0;
+					end if;
+					prod <= sample_data*filtk;
+				end if;
+				
+				if n = -2 then
+					n := -1;
+				elsif n = -1 then
+					filtk <= filtkoeff(0);
+					sample_data <= Q_asynch;
+					n := 0;
+					ns := 0;  -- start with multiplication of Q
+				elsif n < 639 then
+					if n < 319 then
+						nn := n + 1;   -- nn = 0 to 319
 					else 
-						nn := 639 - n; -- nn = 319 to 0, symmetric filter, only half of the taps need to be stored
+						nn := 638 - n; -- nn = 319 to 0, symmetric filter, only half of the taps need to be stored
 					end if;
 					filtk <= filtkoeff(nn);
 					n := n + 1;
-				elsif n = 640 then
+				elsif n = 639 or n = 640 then -- n = 639, final I mult and Q mac, n = 640 final Q mac
 					n := n + 1;
 				elsif n = 641 then
 					if rx_att = "11" then
@@ -811,21 +842,7 @@ filter : process (clk_in)
 					end if;		
 					n := 642; -- to stop
 				end if;
-				
-				prod_I <= I_asynch*filtk; 
-				prod_Q <= Q_asynch*filtk;
-				mac_I <= mac_I + prod_I;
-				mac_Q <= mac_Q + prod_Q;
-			
 			end if;
-				
-			p := filter_start_pointer + n;
-			if p > 659 then
-				read_pointer <= p - 660;
-			else
-				read_pointer <= p;
-			end if;
-			
 		end if;
 	end process;
 	
