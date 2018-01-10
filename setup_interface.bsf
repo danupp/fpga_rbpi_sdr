@@ -125,8 +125,8 @@ agreement for further details.
 	(port
 		(pt 216 176)
 		(output)
-		(text "cw_tx_nomod" (rect 0 0 56 12)(font "Arial" ))
-		(text "cw_tx_nomod" (rect 139 171 195 183)(font "Arial" ))
+		(text "iqswap" (rect 0 0 25 12)(font "Arial" ))
+		(text "iqswap" (rect 170 171 195 183)(font "Arial" ))
 		(line (pt 216 176)(pt 200 176)(line_width 1))
 	)
 	(port

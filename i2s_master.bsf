@@ -55,9 +55,16 @@ agreement for further details.
 	(port
 		(pt 0 96)
 		(input)
-		(text "din" (rect 0 0 10 12)(font "Arial" ))
-		(text "din" (rect 21 91 31 103)(font "Arial" ))
+		(text "iqswap" (rect 0 0 25 12)(font "Arial" ))
+		(text "iqswap" (rect 21 91 46 103)(font "Arial" ))
 		(line (pt 0 96)(pt 16 96)(line_width 1))
+	)
+	(port
+		(pt 0 112)
+		(input)
+		(text "din" (rect 0 0 10 12)(font "Arial" ))
+		(text "din" (rect 21 107 31 119)(font "Arial" ))
+		(line (pt 0 112)(pt 16 112)(line_width 1))
 	)
 	(port
 		(pt 232 32)

@@ -18,7 +18,7 @@ entity setup_interface is
 			usb_lsb : out std_logic := '0';
 			audio_conf_strobe : out std_logic;
 			status_out : out std_logic_vector(7 downto 0);
-			cw_tx_nomod : out std_logic := '1';
+			iqswap : out std_logic := '0';
 			fconf : out std_logic := '0';
 			if_freq : out std_logic_vector(2 downto 0);
 			rx_att : out std_logic_vector(1 downto 0);
@@ -50,7 +50,6 @@ begin
 					fm <= addr(0);
 					tx <= addr(2);
 					key <= addr(1);
-					cw_tx_nomod <= data(21);
 					fconf <= data(19);
 					twotone <= data(17);
 					i2s_enable <= data(16);
@@ -59,6 +58,7 @@ begin
 					rx_att <= data(28 downto 27);
 					if_freq <= data(25 downto 23);
 				elsif addr(7 downto 6) = "11" then
+					iqswap <= addr(0); 
 					freq <= data(24 downto 0); --freq <= addr(5 downto 0) & data; 
 					clar <= data(31 downto 25);
 				elsif addr(7 downto 6) = "10" then

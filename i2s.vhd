@@ -8,6 +8,7 @@ entity i2s_master is
 			sample_clk : in std_logic;
 			I_data_in : in std_logic_vector(23 downto 0);
 			Q_data_in : in std_logic_vector(23 downto 0);
+			iqswap : in std_logic;
 			audio_out : out std_logic_vector(15 downto 0);
 			bclk : buffer std_logic;
 			lrclk : out std_logic;
@@ -50,7 +51,11 @@ begin
 	begin
 		if bclk'event and bclk = '0' then
 			if sample = '1' then
-				data_reg_1 <= I_data_in & "00000000";
+				if iqswap = '0' then
+					data_reg_1 <= I_data_in & "00000000";
+				else
+					data_reg_1 <= Q_data_in & "00000000";
+				end if;
 				sample_rst <= '1';
 				bitcount := 63;
 				lrclk <= '0';
@@ -62,7 +67,11 @@ begin
 			elsif bitcount = 30 then
 				lrclk <= '1';
 				bitcount := 31;
-				data_reg_1 <= Q_data_in & "00000000";
+				if iqswap = '0' then
+					data_reg_1 <= Q_data_in & "00000000";
+				else
+					data_reg_1 <= I_data_in & "00000000";
+				end if;
 				data_reg_2 <= data_reg_2(30 downto 0) & '0';
 			elsif bitcount = 31 then
 				bitcount := 32;

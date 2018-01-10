@@ -43,8 +43,12 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 **2018-01-03**:  
    * Fixed another decimation filter problem. TODO: Reduce memory for buffers and make room for more taps by taking advantage of every second sample being zero after downconversion.  
 
-**2018-01-08**:
+**2018-01-08**:  
    * Optimized downmixer and decimation for very low resource footprint. According to todo.  
+	
+**2018-01-10**:  
+	* Added iqswap.  
+	
 	
 	
 	
