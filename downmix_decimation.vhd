@@ -3,7 +3,7 @@ use ieee.std_logic_1164.ALL;
 use ieee.std_logic_unsigned.ALL;
 use ieee.numeric_std.ALL;
 
-entity down_dec is
+entity down_dec_8 is
 	port (Data_in : in std_logic_vector(23 downto 0);
 			Data_out_I : out std_logic_vector(23 downto 0);
 			Data_out_Q : out std_logic_vector(23 downto 0);
@@ -13,9 +13,9 @@ entity down_dec is
 			clk_out : out std_logic;
 			deb : out std_logic
 			);
-end down_dec;
+end down_dec_8;
 
-architecture down_dec_arch of down_dec is
+architecture down_dec_arch of down_dec_8 is
 	
 type longbuffer is array (0 to 359) of signed (23 downto 0);
 type filt_type is array (0 to 319) of signed (23 downto 0);
@@ -689,13 +689,15 @@ signal sampled : boolean := false;
 
 signal I_asynch, Q_asynch : signed (23 downto 0);
 
-signal filtk : signed(23 downto 0);
+signal filtk_asynch, filtk : signed(23 downto 0);
 signal prod : signed (47 downto 0);
-signal mac_I : signed (65 downto 0);
-signal mac_Q : signed (65 downto 0);
+signal mac_I : signed (50 downto 0);
+signal mac_Q : signed (50 downto 0);
 signal sample_data : signed(23 downto 0);
 	
 signal read_pointer_I, read_pointer_Q : integer range 0 to 359;
+signal tap : integer range 0 to 319;
+
 signal clk_out_next : boolean := false;
 
 signal inbuffer : std_logic_vector(23 downto 0);
@@ -715,6 +717,8 @@ sample_ff : process(clk_sample, sampled)
 	
 I_asynch <= Ia(read_pointer_I);
 Q_asynch <= Qa(read_pointer_Q);
+filtk_asynch <= filtkoeff(tap);
+
 --IQ_asynch <= IQ(read_pointer);
 			
 downconversion : process (clk_in)
@@ -758,11 +762,12 @@ downconversion : process (clk_in)
 					elsif m = 7 then  -- clock out and start filter
 						clk_out_next <= true;
 						m := 0;    -- written samples
-						n := -1;	  -- filter multiplication steps	
-						ns := 2;	  
+						n := 0;	  -- filter multiplication steps	
+						ns := 1;	
+						tap <= 0;		
 						prod <= to_signed(0,48);
-						mac_I <= to_signed(0,66);
-						mac_Q <= to_signed(0,66);	
+						mac_I <= to_signed(0,51);
+						mac_Q <= to_signed(0,51);	
 						
 						p := write_pointer_last;
 						if p > 359 then
@@ -784,16 +789,565 @@ downconversion : process (clk_in)
 					end if;
 				end if;	
 			else
-				if n > -1 and n < 641 then
-					if ns = 0 then  -- filtk and sample now for Q - compute prod for Q, prod now is for I
+				if n < 641 then
+				   -- start at n=-1, then no sample_data and no_filtk
+				   -- n = 0, ns = 0  => first Q sample and filter tap
+					-- n = 640 then filtk for tap = 639, last one
+					
+					if ns = 0 then  -- filtk and sample now for Q - compute prod for Q, prod now is for I				
 						sample_data <= I_asynch;
 						mac_I <= mac_I + prod;
 						p := read_pointer_Q + 1;
 						if p > 359 then
-								read_pointer_Q <= p - 360;
+							read_pointer_Q <= p - 360;
 						else
 							read_pointer_Q <= p;
+						end if;					
+						ns := 1;
+					elsif ns = 1 then
+						sample_data <= Q_asynch;
+						mac_Q <= mac_Q + prod;
+						p := read_pointer_I + 1;
+						if p > 359 then
+							read_pointer_I <= p - 360;
+						else
+							read_pointer_I <= p;
 						end if;
+						ns := 0;
+					end if;
+					if n < 319 then
+						nn := n + 1;   -- nn = 1 to 319
+					elsif n < 639 then
+						nn := 638 - n; -- nn = 319 to 0, symmetric filter, only half of the taps need to be stored
+					end if;
+					tap <= nn;
+					prod <= sample_data*filtk;
+					filtk <= filtk_asynch;  -- filtk_asynch valid from n=1
+				end if;
+				
+				if n < 641 then -- n = 639, final I mult and Q mac, n = 640 final Q mac
+					n := n + 1;
+				elsif n = 641 then
+					if rx_att = "11" then
+						Data_out_I <= std_logic_vector(mac_I + to_signed(67108864,51))(50 downto 27);  
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(67108864,51))(50 downto 27);
+					elsif rx_att = "10" then
+						Data_out_I <= std_logic_vector(mac_I + to_signed(33554432,51))(49 downto 26); 
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(33554432,51))(49 downto 26);
+					elsif rx_att = "01" then
+						Data_out_I <= std_logic_vector(mac_I + to_signed(16777216,51))(48 downto 25);  
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(16777216,51))(48 downto 25);
+					else
+						Data_out_I <= std_logic_vector(mac_I + to_signed(8388608,51))(47 downto 24);  
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(8388608,51))(47 downto 24);
+					end if;		
+					n := 642; -- to stop
+				end if;
+			end if;
+		end if;
+	end process;
+	
+deb <= '0';
+
+end down_dec_arch;
+
+
+
+
+
+
+
+
+
+
+library ieee;
+use ieee.std_logic_1164.ALL;
+use ieee.std_logic_unsigned.ALL;
+use ieee.numeric_std.ALL;
+
+entity down_dec_7 is
+	port (Data_in : in std_logic_vector(23 downto 0);
+			Data_out_I : out std_logic_vector(23 downto 0);
+			Data_out_Q : out std_logic_vector(23 downto 0);
+			clk_in : in std_logic; 
+			clk_sample : in std_logic; 
+			rx_att : in std_logic_vector(1 downto 0);
+			clk_out : out std_logic;
+			deb : out std_logic
+			);
+end down_dec_7;
+
+architecture down_dec_arch of down_dec_7 is
+	
+type longbuffer is array (0 to 359) of signed (23 downto 0);
+type filt_type is array (0 to 319) of signed (23 downto 0);
+
+signal Ia : longbuffer;
+signal Qa : longbuffer;
+--signal IQ : longbuffer;
+
+
+constant filtkoeff : filt_type :=
+
+-- Scilab:
+-->[v,a,f] = wfir ('lp', 640, [25/625 0], 'kr', 20);
+--> round(v*2^26)
+
+	("000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "111111111111111111111111",
+    "111111111111111111111111",
+    "111111111111111111111111",
+    "111111111111111111111111",
+    "111111111111111111111111",
+    "111111111111111111111111",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000000",
+    "000000000000000000000001",
+    "000000000000000000000001",
+    "000000000000000000000010",
+    "000000000000000000000010",
+    "000000000000000000000011",
+    "000000000000000000000011",
+    "000000000000000000000011",
+    "000000000000000000000011",
+    "000000000000000000000011",
+    "000000000000000000000010",
+    "000000000000000000000001",
+    "111111111111111111111111",
+    "111111111111111111111101",
+    "111111111111111111111011",
+    "111111111111111111111001",
+    "111111111111111111110111",
+    "111111111111111111110110",
+    "111111111111111111110101",
+    "111111111111111111110100",
+    "111111111111111111110100",
+    "111111111111111111110110",
+    "111111111111111111111000",
+    "111111111111111111111011",
+    "000000000000000000000000",
+    "000000000000000000000101",
+    "000000000000000000001011",
+    "000000000000000000010010",
+    "000000000000000000011000",
+    "000000000000000000011101",
+    "000000000000000000100010",
+    "000000000000000000100100",
+    "000000000000000000100100",
+    "000000000000000000100001",
+    "000000000000000000011100",
+    "000000000000000000010011",
+    "000000000000000000000111",
+    "111111111111111111111001",
+    "111111111111111111101000",
+    "111111111111111111010111",
+    "111111111111111111000110",
+    "111111111111111110110110",
+    "111111111111111110101010",
+    "111111111111111110100001",
+    "111111111111111110011111",
+    "111111111111111110100011",
+    "111111111111111110101111",
+    "111111111111111111000011",
+    "111111111111111111011110",
+    "000000000000000000000000",
+    "000000000000000000100111",
+    "000000000000000001010001",
+    "000000000000000001111100",
+    "000000000000000010100100",
+    "000000000000000011000110",
+    "000000000000000011011110",
+    "000000000000000011101010",
+    "000000000000000011100110",
+    "000000000000000011010010",
+    "000000000000000010101011",
+    "000000000000000001110010",
+    "000000000000000000101001",
+    "111111111111111111010100",
+    "111111111111111101110101",
+    "111111111111111100010100",
+    "111111111111111010110111",
+    "111111111111111001100101",
+    "111111111111111000100101",
+    "111111111111110111111111",
+    "111111111111110111111000",
+    "111111111111111000010110",
+    "111111111111111001011010",
+    "111111111111111011000101",
+    "111111111111111101010011",
+    "000000000000000000000000",
+    "000000000000000011000010",
+    "000000000000000110001110",
+    "000000000000001001011000",
+    "000000000000001100001111",
+    "000000000000001110100101",
+    "000000000000010000001100",
+    "000000000000010000110111",
+    "000000000000010000011010",
+    "000000000000001110110001",
+    "000000000000001011111001",
+    "000000000000000111111000",
+    "000000000000000010110101",
+    "111111111111111101000001",
+    "111111111111110110110001",
+    "111111111111110000011100",
+    "111111111111101010100001",
+    "111111111111100101011010",
+    "111111111111100001100110",
+    "111111111111011111011111",
+    "111111111111011111011001",
+    "111111111111100001100011",
+    "111111111111100110000010",
+    "111111111111101100110010",
+    "111111111111110101100101",
+    "000000000000000000000000",
+    "000000000000001011100000",
+    "000000000000010111011010",
+    "000000000000100010111010",
+    "000000000000101101001100",
+    "000000000000110101011001",
+    "000000000000111010110000",
+    "000000000000111100101000",
+    "000000000000111010100010",
+    "000000000000110100001110",
+    "000000000000101001101110",
+    "000000000000011011010111",
+    "000000000000001001110000",
+    "111111111111110101110011",
+    "111111111111100000101001",
+    "111111111111001011101000",
+    "111111111110111000001110",
+    "111111111110100111111001",
+    "111111111110011100000010",
+    "111111111110010101111001",
+    "111111111110010110011001",
+    "111111111110011110000110",
+    "111111111110101101001001",
+    "111111111111000011001001",
+    "111111111111011111001110",
+    "000000000000000000000000",
+    "000000000000100011101010",
+    "000000000001001000000000",
+    "000000000001101010101000",
+    "000000000010001001000011",
+    "000000000010100000110100",
+    "000000000010101111110001",
+    "000000000010110100001000",
+    "000000000010101100101110",
+    "000000000010011001000101",
+    "000000000001111001100000",
+    "000000000001001111001010",
+    "000000000000011100000010",
+    "111111111111100010110111",
+    "111111111110100111000001",
+    "111111111101101100010110",
+    "111111111100110110111000",
+    "111111111100001010101001",
+    "111111111011101011010111",
+    "111111111011011100001001",
+    "111111111011011111010001",
+    "111111111011110101111101",
+    "111111111100100000001011",
+    "111111111101011100100101",
+    "111111111110101000100000",
+    "000000000000000000000000",
+    "000000000001011110000110",
+    "000000000010111100111101",
+    "000000000100010110010001",
+    "000000000101100011101001",
+    "000000000110011111000010",
+    "000000000111000011001000",
+    "000000000111001011110101",
+    "000000000110110110100100",
+    "000000000110000010100111",
+    "000000000100110001010000",
+    "000000000011000101110110",
+    "000000000001000101101100",
+    "111111111110110111111010",
+    "111111111100100101000000",
+    "111111111010010110011001",
+    "111111111000010101111010",
+    "111111110110101101000100",
+    "111111110101100100011101",
+    "111111110101000011000111",
+    "111111110101001101111010",
+    "111111110110000111000111",
+    "111111110111101110000001",
+    "111111111001111110110100",
+    "111111111100110010101100",
+    "000000000000000000000000",
+    "000000000011011010110011",
+    "000000000110110101011100",
+    "000000001010000001011011",
+    "000000001100110000010001",
+    "000000001110110100100010",
+    "000000010000000010101110",
+    "000000010000010010001100",
+    "000000001111011101111101",
+    "000000001101100101001100",
+    "000000001010101011100100",
+    "000000000110111001010011",
+    "000000000010011010110111",
+    "111111111101100000011011",
+    "111111111000011101000010",
+    "111111110011100101011111",
+    "111111101111001111000100",
+    "111111101011101110001011",
+    "111111101001010100111000",
+    "111111101000010001101001",
+    "111111101000101110000101",
+    "111111101010101110000110",
+    "111111101110001111001111",
+    "111111110011001000011101",
+    "111111111001001010011001",
+    "000000000000000000000000",
+    "000000000111001111100010",
+    "000000001110011100000100",
+    "000000010101000111000111",
+    "000000011010110010101011",
+    "000000011111000011001010",
+    "000000100001100001010101",
+    "000000100001111100001010",
+    "000000100000001010001111",
+    "000000011100001010110111",
+    "000000010110000110100110",
+    "000000001110001111001110",
+    "000000000100111111000101",
+    "111111111010110111110110",
+    "111111110000100000110000",
+    "111111100110100100010101",
+    "111111011101101101110000",
+    "111111010110100110001001",
+    "111111010001110001101011",
+    "111111001111101100111111",
+    "111111010000101010110110",
+    "111111010100110010011011",
+    "111111011011111110000011",
+    "111111100101111011000000",
+    "111111110010001001111001",
+    "000000000000000000000000",
+    "000000001110101001011110",
+    "000000011101001100000100",
+    "000000101010101010101100",
+    "000000110110001001001000",
+    "000000111110101111111110",
+    "000001000011110000100110",
+    "000001000100101000100010",
+    "000001000001000100100011",
+    "000000111001000010101000",
+    "000000101100110011001100",
+    "000000011100111001000100",
+    "000000001010001000011000",
+    "111111110101100100000111",
+    "111111100000011010110011",
+    "111111001100000010001000",
+    "111110111001110001110110",
+    "111110101010111110010111",
+    "111110100000110011001000",
+    "111110011100001101010000",
+    "111110011101110110110011",
+    "111110100110000010111100",
+    "111110110100101011010000",
+    "111111001001001110100111",
+    "111111100010110001011110",
+    "000000000000000000000000",
+    "000000011111010001101011",
+    "000000111110101110011111",
+    "000001011100010101010101",
+    "000001110110000011010111",
+    "000010001001111100000001",
+    "000010010110010000111110",
+    "000010011001101001111101",
+    "000010010011001011100110",
+    "000010000010011101000101",
+    "000001100111101100001101",
+    "000001000011101111011010",
+    "000000011000000101100110",
+    "111111100110110011110010",
+    "111110110010100000011010",
+    "111101111110001100100011",
+    "111101001101001011010110",
+    "111100100010111000000000",
+    "111100000010101010101100",
+    "111011101111101101001111",
+    "111011101100101111111001",
+    "111011111011111110111101",
+    "111100011110111001101010",
+    "111101010110001011001000",
+    "111110100001100101100011",
+    "000000000000000000000000",
+    "000001101111010111010011",
+    "000011101100110001100000",
+    "000101110100100100011010",
+    "001000000010011110100001",
+    "001010010001110010000101",
+    "001100011101100001111001",
+    "001110100000101110111111",
+    "010000010110100110110100",
+    "010001111010110000111010",
+    "010011001001011011101110",
+    "010011111111100111100011",
+    "010100011011001111011111");
+
+--attribute ramstyle : string;
+--attribute ramstyle of filtkoeff : constant is "M4K";
+
+signal sample : boolean := false;
+signal sampled : boolean := false;
+
+signal I_asynch, Q_asynch : signed (23 downto 0);
+
+signal filtk_asynch, filtk : signed(23 downto 0);
+signal prod : signed (47 downto 0);
+signal mac_I : signed (50 downto 0);
+signal mac_Q : signed (50 downto 0);
+signal sample_data : signed(23 downto 0);
+	
+signal read_pointer_I, read_pointer_Q : integer range 0 to 359;
+signal tap : integer range 0 to 319;
+
+signal clk_out_next : boolean := false;
+
+signal inbuffer : std_logic_vector(23 downto 0);
+	
+begin
+
+sample_ff : process(clk_sample, sampled)
+	begin
+		if sampled = true then
+			sample <= false;
+		elsif clk_sample'event and clk_sample = '1' then
+			inbuffer <= data_in;
+			sample <= true;
+		end if;
+	end process;
+	
+	
+I_asynch <= Ia(read_pointer_I);
+Q_asynch <= Qa(read_pointer_Q);
+filtk_asynch <= filtkoeff(tap);
+
+--IQ_asynch <= IQ(read_pointer);
+			
+downconversion : process (clk_in)
+	variable n : integer range -1 to 659;
+	variable ns : integer range 0 to 2;
+	variable nn : integer range 0 to 319;
+	variable m : integer range 0 to 3 := 0;
+	variable mm : integer range 0 to 7 := 0;
+	variable p : integer range 0 to 800;
+	variable write_pointer, write_pointer_last : integer range 0 to 359 := 0;
+	
+	begin	
+		if clk_in'event and clk_in = '1' then		
+			if clk_out_next = true then
+				clk_out <= '1';
+			else
+				clk_out <= '0';
+			end if;
+
+			if sample = true then
+				sampled <= true;			
+			elsif sampled = true then
+				sampled <= false;
+				if m = 0 then
+					Ia(write_pointer) <= signed(inbuffer);  				-- 1
+					--Qa(write_pointer) <= to_signed(0,24); 		-- 0
+					m := m + 1;
+				elsif m = 1 then
+					--Ia(write_pointer) <= to_signed(0,24);		-- 0
+					Qa(write_pointer) <= signed(inbuffer);			-- 1
+					m := m + 1;
+				elsif m = 2 then
+					Ia(write_pointer) <= signed(not inbuffer) + 1; -- -1
+					--Qa(write_pointer) <= to_signed(0,24); 	 -- 0
+					m := m + 1;
+				elsif m = 3 then
+					--Ia(write_pointer) <= to_signed(0,24);		-- 0
+					Qa(write_pointer) <= signed(not inbuffer) + 1; -- -1
+					m := 0;
+				end if;
+				
+				if m = 0 or m = 2 then	--- these are new m's		
+					write_pointer_last := write_pointer;
+					if write_pointer = 0 then
+						write_pointer := 359;
+					else
+						write_pointer := write_pointer - 1;
+					end if;
+				end if;
+			
+				
+				
+				if mm = 7 then  -- clock out and start filter
+					deb <= '0';
+					clk_out_next <= true;
+					mm := 0;    -- written samples
+					n := -1;	  -- filter multiplication steps
+					ns := 2;	
+					tap <= 0;		
+					prod <= to_signed(0,48);
+					mac_I <= to_signed(0,51);
+					mac_Q <= to_signed(0,51);	
+						
+					p := write_pointer_last;
+					if p > 359 then
+						read_pointer_I <= p - 360;
+						read_pointer_Q <= p - 360;
+					else
+						read_pointer_I <= p;
+						read_pointer_Q <= p;
+					end if;
+				else
+					mm := mm + 1;
+					clk_out_next <= false;
+				end if;
+			end if;
+
+			if not (mm = 0 and sampled = true) then
+				if n = -1 then
+					sample_data <= Q_asynch;
+					ns := 0;  -- start with multiplication of Q
+				elsif n > -1 and n < 641 then
+				   -- start at n=-1, then no sample_data and no_filtk
+				   -- n = 0, ns = 0  => first Q sample and filter tap
+					-- n = 639 then filtk for tap = 639, last one
+					-- n = 640 last mac
+					
+					if ns = 0 then  -- filtk and sample now for Q - compute prod for Q, prod now is for I				
+						sample_data <= I_asynch;
+						mac_I <= mac_I + prod;
+						p := read_pointer_Q + 1;
+						if p > 359 then
+							read_pointer_Q <= p - 360;
+						else
+							read_pointer_Q <= p;
+						end if;					
 						ns := 1;
 					elsif ns = 1 then
 						sample_data <= Q_asynch;
@@ -809,43 +1363,34 @@ downconversion : process (clk_in)
 					prod <= sample_data*filtk;
 				end if;
 				
-				if n = -2 then
-					n := -1;
-				elsif n = -1 then
-					filtk <= filtkoeff(0);
-					sample_data <= Q_asynch;
-					n := 0;
-					ns := 0;  -- start with multiplication of Q
-				elsif n < 639 then
-					if n < 319 then
-						nn := n + 1;   -- nn = 0 to 319
-					else 
-						nn := 638 - n; -- nn = 319 to 0, symmetric filter, only half of the taps need to be stored
+				if n < 641 then -- n = 639, final I mult and Q mac, n = 640 final Q mac
+					if n < 318 then
+						nn := n + 2;   -- nn = 1 to 319
+					elsif n < 638 then
+						nn := 637 - n; -- nn = 319 to 0, symmetric filter, only half of the taps need to be stored
 					end if;
-					filtk <= filtkoeff(nn);
-					n := n + 1;
-				elsif n = 639 or n = 640 then -- n = 639, final I mult and Q mac, n = 640 final Q mac
+					tap <= nn;				
+					filtk <= filtk_asynch;
 					n := n + 1;
 				elsif n = 641 then
+					deb <= '1';
 					if rx_att = "11" then
-						Data_out_I <= std_logic_vector(mac_I + to_signed(67108864,66))(50 downto 27);  
-						Data_out_Q <= std_logic_vector(mac_Q + to_signed(67108864,66))(50 downto 27);
+						Data_out_I <= std_logic_vector(mac_I + to_signed(67108864,51))(50 downto 27);  
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(67108864,51))(50 downto 27);
 					elsif rx_att = "10" then
-						Data_out_I <= std_logic_vector(mac_I + to_signed(33554432,66))(49 downto 26); 
-						Data_out_Q <= std_logic_vector(mac_Q + to_signed(33554432,66))(49 downto 26);
+						Data_out_I <= std_logic_vector(mac_I + to_signed(33554432,51))(49 downto 26); 
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(33554432,51))(49 downto 26);
 					elsif rx_att = "01" then
-						Data_out_I <= std_logic_vector(mac_I + to_signed(16777216,66))(48 downto 25);  
-						Data_out_Q <= std_logic_vector(mac_Q + to_signed(16777216,66))(48 downto 25);
+						Data_out_I <= std_logic_vector(mac_I + to_signed(16777216,51))(48 downto 25);  
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(16777216,51))(48 downto 25);
 					else
-						Data_out_I <= std_logic_vector(mac_I + to_signed(8388608,66))(47 downto 24);  
-						Data_out_Q <= std_logic_vector(mac_Q + to_signed(8388608,66))(47 downto 24);
+						Data_out_I <= std_logic_vector(mac_I + to_signed(8388608,51))(47 downto 24);  
+						Data_out_Q <= std_logic_vector(mac_Q + to_signed(8388608,51))(47 downto 24);
 					end if;		
 					n := 642; -- to stop
 				end if;
 			end if;
 		end if;
 	end process;
-	
-deb <= '0';
 
 end down_dec_arch;

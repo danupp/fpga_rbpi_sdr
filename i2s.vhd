@@ -23,17 +23,22 @@ signal data_reg_1, data_reg_2 : std_logic_vector(31 downto 0);
 signal receive_reg : std_logic_vector(31 downto 0);
 signal sample : std_logic;
 signal sample_rst : std_logic;
-signal clockdiv : unsigned(3 downto 0);
+signal clockdiv : integer range 0 to 21;
  
 begin
 
-	dout <= data_reg_2(31);
-	bclk <= clockdiv(1);
+	dout <= data_reg_2(31);   --  ändra till process för att ge 96 kHz
+	--bclk <= clockdiv(1);
 	
 	clockdivider : process(clk0)
 	begin
 		if clk0'event and clk0 = '1' then
-			clockdiv <= clockdiv + 1;
+			if clockdiv = 20 then
+				bclk <= not bclk;
+				clockdiv <= 0;
+			else
+				clockdiv <= clockdiv + 1;
+			end if;
 		end if;
 	end process;
 		

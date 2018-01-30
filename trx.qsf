@@ -235,4 +235,6 @@ set_global_assignment -name VHDL_FILE i2s.vhd
 set_global_assignment -name CDF_FILE docs/Chain3.cdf
 set_global_assignment -name QIP_FILE ddsmem.qip
 set_global_assignment -name VHDL_FILE roofing_filter.vhd
+set_global_assignment -name ALLOW_ANY_ROM_SIZE_FOR_RECOGNITION ON
+set_global_assignment -name AUTO_ROM_RECOGNITION ON
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
