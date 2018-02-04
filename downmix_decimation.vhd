@@ -1259,7 +1259,7 @@ downconversion : process (clk_in)
 	variable ns : integer range 0 to 2;
 	variable nn : integer range 0 to 319;
 	variable m : integer range 0 to 3 := 0;
-	variable mm : integer range 0 to 7 := 0;
+	variable mm : integer range 0 to 9 := 0;
 	variable p : integer range 0 to 800;
 	variable write_pointer, write_pointer_last : integer range 0 to 359 := 0;
 	
@@ -1293,6 +1293,29 @@ downconversion : process (clk_in)
 					m := 0;
 				end if;
 				
+				if mm = 6 then  -- clock out and start filter
+					deb <= '0';
+					clk_out_next <= true;
+					mm := 0;    -- written samples
+					n := -1;	  -- filter multiplication steps
+					if m = 0 or m = 2 then 
+						ns := 0;	-- start with multiplication of Q
+						read_pointer_I <= write_pointer;
+						read_pointer_Q <= write_Pointer;
+					else
+						ns := 1;
+						read_pointer_I <= write_pointer;
+						read_pointer_Q <= write_pointer_last;
+					end if;
+					tap <= 0;		
+					prod <= to_signed(0,48);
+					mac_I <= to_signed(0,51);
+					mac_Q <= to_signed(0,51);	
+				else
+					mm := mm + 1;
+					clk_out_next <= false;
+				end if;
+				
 				if m = 0 or m = 2 then	--- these are new m's		
 					write_pointer_last := write_pointer;
 					if write_pointer = 0 then
@@ -1300,39 +1323,18 @@ downconversion : process (clk_in)
 					else
 						write_pointer := write_pointer - 1;
 					end if;
-				end if;
-			
+				end if;		
 				
-				
-				if mm = 7 then  -- clock out and start filter
-					deb <= '0';
-					clk_out_next <= true;
-					mm := 0;    -- written samples
-					n := -1;	  -- filter multiplication steps
-					ns := 2;	
-					tap <= 0;		
-					prod <= to_signed(0,48);
-					mac_I <= to_signed(0,51);
-					mac_Q <= to_signed(0,51);	
-						
-					p := write_pointer_last;
-					if p > 359 then
-						read_pointer_I <= p - 360;
-						read_pointer_Q <= p - 360;
-					else
-						read_pointer_I <= p;
-						read_pointer_Q <= p;
-					end if;
-				else
-					mm := mm + 1;
-					clk_out_next <= false;
-				end if;
 			end if;
 
 			if not (mm = 0 and sampled = true) then
 				if n = -1 then
-					sample_data <= Q_asynch;
-					ns := 0;  -- start with multiplication of Q
+					if ns = 0 then
+						sample_data <= Q_asynch;
+					else
+						sample_data <= I_asynch;
+					end if;
+					--ns := 0;  -- start with multiplication of Q
 				elsif n > -1 and n < 641 then
 				   -- start at n=-1, then no sample_data and no_filtk
 				   -- n = 0, ns = 0  => first Q sample and filter tap

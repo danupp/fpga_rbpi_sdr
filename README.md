@@ -53,8 +53,11 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 * Improved code slightly in downdec. Turned on the "Allow Any ROM Size for Recognition"-option in advanced synthesis settings but still cannot force FIR-taps go to hard memory.  
 
 **2018-01-30**:  
-* Changed decimation factor to 7. Now giving 89.2857.. ksps with 625 ksps in ADC. This also moves I2S-clock harmonic away from center frequency.
-	
+* Changed decimation factor to 7. Now giving 89.2857.. ksps with 625 ksps in ADC. This also moves I2S-clock harmonic away from center frequency.  
+
+**2018-02-04**:  
+* Bugfix. Now proper decimation by 7.  
+
 	
 	
 	
