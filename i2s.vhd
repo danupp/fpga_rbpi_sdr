@@ -9,7 +9,8 @@ entity i2s_master is
 			I_data_in : in std_logic_vector(23 downto 0);
 			Q_data_in : in std_logic_vector(23 downto 0);
 			iqswap : in std_logic;
-			audio_out : out std_logic_vector(15 downto 0);
+			audio_out_l : out std_logic_vector(15 downto 0);
+			audio_out_r : out std_logic_vector(15 downto 0);
 			bclk : buffer std_logic;
 			lrclk : out std_logic;
 			dout : out std_logic;
@@ -81,7 +82,8 @@ begin
 			elsif bitcount = 31 then
 				bitcount := 32;
 				data_reg_2 <= data_reg_1;
-				audio_out <= receive_reg(31 downto 16);
+				audio_out_l <= receive_reg(31 downto 16);
+				audio_out_r <= receive_reg(15 downto 0);
 			else
 				bitcount := bitcount + 1;
 				data_reg_2 <= data_reg_2(30 downto 0) & '0';

@@ -58,6 +58,8 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 **2018-02-04**:  
 * Bugfix. Now proper decimation by 7.  
 
+**2018-11-13**: 
+* Added memory for cos and sin generation for DAC A. Added TX-multiplier taking input from I2S. Built jic-binary.  
 	
 	
 	

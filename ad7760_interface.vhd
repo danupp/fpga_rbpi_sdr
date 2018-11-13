@@ -184,7 +184,7 @@ begin
 	
 sample_clk_gen : process (clk0)
 begin
-	if clk0'event and clk0 = '0' then
+	if clk0'event and clk0 = '1' then
 		if ADC_Clk_en = true then
 			ADC_Clk <= '1';
 		else
