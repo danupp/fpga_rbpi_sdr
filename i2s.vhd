@@ -91,7 +91,7 @@ begin
 			elsif bitcount = 31 then
 				bitcount := 32;
 				data_reg_2 <= data_reg_1;
-				data_received_r <= receive_reg;
+				data_received_l <= receive_reg;
 			else
 				bitcount := bitcount + 1;
 				data_reg_2 <= data_reg_2(30 downto 0) & '0';

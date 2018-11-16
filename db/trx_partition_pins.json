@@ -28,6 +28,10 @@
 					"strict" : false
 				},
 				{
+					"name" : "CODEC_DIN",
+					"strict" : false
+				},
+				{
 					"name" : "CODEC_SCL",
 					"strict" : false
 				},
@@ -208,6 +212,10 @@
 					"strict" : false
 				},
 				{
+					"name" : "CODEC_SCLK",
+					"strict" : false
+				},
+				{
 					"name" : "ADC_nDRDY",
 					"strict" : false
 				},
@@ -216,11 +224,11 @@
 					"strict" : false
 				},
 				{
-					"name" : "SCL_RXD",
+					"name" : "CODEC_FS",
 					"strict" : false
 				},
 				{
-					"name" : "CODEC_FS",
+					"name" : "SCL_RXD",
 					"strict" : false
 				},
 				{
