@@ -1,6 +1,6 @@
 import math
 
-f = open('raw_sin_quarter_unsigned__12-13.mif', 'w')
+f = open('raw_cos_quarter_unsigned__12-13.mif', 'w')
 
 f.write("DEPTH = 4096;\nWIDTH = 13;\nADDRESS_RADIX = DEC;\nDATA_RADIX = DEC;\n\n")
 f.write("CONTENT\nBEGIN\n")

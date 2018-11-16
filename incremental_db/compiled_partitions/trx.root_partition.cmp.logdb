@@ -5,4 +5,5 @@ DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,down_dec_7:inst6|lpm_mult:Mult0|mult_86t
 DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,down_dec_7:inst6|lpm_mult:Mult0|mult_86t:auto_generated|mac_out8,
 DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,down_dec_7:inst6|lpm_mult:Mult0|mult_86t:auto_generated|mac_out4,
 DSP_BALANCING_IMPLEMENTATION,DSP_BLOCKS,down_dec_7:inst6|lpm_mult:Mult0|mult_86t:auto_generated|mac_out6,
+PORT_SWAPPING,PORT_SWAP_TYPE_DSPMULT,tx_mod_blocks:inst10|txmult:inst1|lpm_mult:lpm_mult_component|mult_6sq:auto_generated|mac_mult1,
 PORT_SWAPPING,PORT_SWAP_TYPE_DSPMULT,down_dec_7:inst6|lpm_mult:Mult0|mult_86t:auto_generated|mac_mult5,

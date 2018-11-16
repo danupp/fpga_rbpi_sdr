@@ -14,14 +14,15 @@ entity i2s_master is
 			bclk : buffer std_logic;
 			lrclk : out std_logic;
 			dout : out std_logic;
-			din : in std_logic
+			din : in std_logic;
+			tx : in std_logic
 			);
 end i2s_master;
 
 architecture arch of i2s_master is
 
 signal data_reg_1, data_reg_2 : std_logic_vector(31 downto 0);
-signal receive_reg : std_logic_vector(31 downto 0);
+signal receive_reg, data_received_r, data_received_l : std_logic_vector(31 downto 0);
 signal sample : std_logic;
 signal sample_rst : std_logic;
 signal clockdiv : integer range 0 to 21;
@@ -30,6 +31,9 @@ begin
 
 	dout <= data_reg_2(31);   --  ändra till process för att ge 96 kHz
 	--bclk <= clockdiv(1);
+	
+	audio_out_l <= data_received_l (31 downto 16);
+	audio_out_r <= data_received_r (31 downto 16);
 	
 	clockdivider : process(clk0)
 	begin
@@ -57,7 +61,9 @@ begin
 	begin
 		if bclk'event and bclk = '0' then
 			if sample = '1' then
-				if iqswap = '0' then
+				if tx = '1' then
+					data_reg_1 <= data_received_l;
+				elsif iqswap = '0' then
 					data_reg_1 <= I_data_in & "00000000";
 				else
 					data_reg_1 <= Q_data_in & "00000000";
@@ -70,10 +76,13 @@ begin
 				bitcount := 0;
 				data_reg_2 <= data_reg_1;
 				sample_rst <= '0';
+				data_received_r <= receive_reg;
 			elsif bitcount = 30 then
 				lrclk <= '1';
 				bitcount := 31;
-				if iqswap = '0' then
+				if tx = '1' then
+					data_reg_1 <= data_received_r;
+				elsif iqswap = '0' then
 					data_reg_1 <= Q_data_in & "00000000";
 				else
 					data_reg_1 <= I_data_in & "00000000";
@@ -82,8 +91,7 @@ begin
 			elsif bitcount = 31 then
 				bitcount := 32;
 				data_reg_2 <= data_reg_1;
-				audio_out_l <= receive_reg(31 downto 16);
-				audio_out_r <= receive_reg(15 downto 0);
+				data_received_r <= receive_reg;
 			else
 				bitcount := bitcount + 1;
 				data_reg_2 <= data_reg_2(30 downto 0) & '0';
