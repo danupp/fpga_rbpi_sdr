@@ -11,6 +11,7 @@ entity i2s_master is
 			iqswap : in std_logic;
 			audio_out_l : out std_logic_vector(15 downto 0);
 			audio_out_r : out std_logic_vector(15 downto 0);
+			audio_in : in std_logic_vector(15 downto 0);
 			bclk : buffer std_logic;
 			lrclk : out std_logic;
 			dout : out std_logic;
@@ -63,7 +64,7 @@ begin
 		if bclk'event and bclk = '0' then
 			if sample = '1' then
 				if tx = '1' then
-					data_reg_1 <= data_received_l(31 downto 1) & key;
+					data_reg_1 <= audio_in & "000000000000000" & key;
 				elsif iqswap = '0' then
 					data_reg_1 <= I_data_in & "00000000";
 				else

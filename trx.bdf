@@ -1933,9 +1933,26 @@ agreement for further details.
 	)
 )
 (symbol
-	(rect 2728 768 2968 944)
+	(rect 328 136 360 168)
+	(text "GND" (rect 8 16 32 27)(font "Arial" (font_size 6)))
+	(text "inst18" (rect 3 21 59 33)(font "Liberation Sans" )(invisible))
+	(port
+		(pt 16 0)
+		(output)
+		(text "1" (rect 18 0 25 12)(font "Courier New" (bold))(invisible))
+		(text "1" (rect 18 0 25 12)(font "Courier New" (bold))(invisible))
+		(line (pt 16 8)(pt 16 0))
+	)
+	(drawing
+		(line (pt 8 8)(pt 16 16))
+		(line (pt 16 16)(pt 24 8))
+		(line (pt 8 8)(pt 24 8))
+	)
+)
+(symbol
+	(rect 2728 768 2968 976)
 	(text "i2s_master" (rect 5 0 99 12)(font "Arial" ))
-	(text "inst9" (rect 8 160 55 172)(font "Arial" ))
+	(text "inst9" (rect 8 192 55 204)(font "Arial" ))
 	(port
 		(pt 0 32)
 		(input)
@@ -1974,23 +1991,30 @@ agreement for further details.
 	(port
 		(pt 0 112)
 		(input)
-		(text "din" (rect 0 0 28 12)(font "Arial" ))
-		(text "din" (rect 21 107 49 119)(font "Arial" ))
-		(line (pt 0 112)(pt 16 112))
+		(text "audio_in[15..0]" (rect 0 0 141 12)(font "Arial" ))
+		(text "audio_in[15..0]" (rect 21 107 162 119)(font "Arial" ))
+		(line (pt 0 112)(pt 16 112)(line_width 3))
 	)
 	(port
 		(pt 0 128)
 		(input)
-		(text "tx" (rect 0 0 18 12)(font "Arial" ))
-		(text "tx" (rect 21 123 39 135)(font "Arial" ))
+		(text "din" (rect 0 0 28 12)(font "Arial" ))
+		(text "din" (rect 21 123 49 135)(font "Arial" ))
 		(line (pt 0 128)(pt 16 128))
 	)
 	(port
 		(pt 0 144)
 		(input)
-		(text "key" (rect 0 0 28 12)(font "Arial" ))
-		(text "key" (rect 21 139 49 151)(font "Arial" ))
+		(text "tx" (rect 0 0 18 12)(font "Arial" ))
+		(text "tx" (rect 21 139 39 151)(font "Arial" ))
 		(line (pt 0 144)(pt 16 144))
+	)
+	(port
+		(pt 0 160)
+		(input)
+		(text "key" (rect 0 0 28 12)(font "Arial" ))
+		(text "key" (rect 21 155 49 167)(font "Arial" ))
+		(line (pt 0 160)(pt 16 160))
 	)
 	(port
 		(pt 240 32)
@@ -2028,24 +2052,7 @@ agreement for further details.
 		(line (pt 240 96)(pt 224 96))
 	)
 	(drawing
-		(rectangle (rect 16 16 224 160))
-	)
-)
-(symbol
-	(rect 328 136 360 168)
-	(text "GND" (rect 8 16 32 27)(font "Arial" (font_size 6)))
-	(text "inst18" (rect 3 21 59 33)(font "Liberation Sans" )(invisible))
-	(port
-		(pt 16 0)
-		(output)
-		(text "1" (rect 18 0 25 12)(font "Courier New" (bold))(invisible))
-		(text "1" (rect 18 0 25 12)(font "Courier New" (bold))(invisible))
-		(line (pt 16 8)(pt 16 0))
-	)
-	(drawing
-		(line (pt 8 8)(pt 16 16))
-		(line (pt 16 16)(pt 24 8))
-		(line (pt 8 8)(pt 24 8))
+		(rectangle (rect 16 16 224 192))
 	)
 )
 (connector
@@ -2898,14 +2905,6 @@ agreement for further details.
 	(bus)
 )
 (connector
-	(pt 2704 984)
-	(pt 2704 880)
-)
-(connector
-	(pt 2704 880)
-	(pt 2728 880)
-)
-(connector
 	(pt 2728 864)
 	(pt 2648 864)
 )
@@ -3382,15 +3381,6 @@ agreement for further details.
 	(pt 1264 -664)
 )
 (connector
-	(pt 2728 896)
-	(pt 2664 896)
-)
-(connector
-	(text "conf[0]" (rect 2648 1038 2660 1104)(font "Liberation Sans" )(vertical))
-	(pt 2664 896)
-	(pt 2664 1136)
-)
-(connector
 	(pt 2648 1136)
 	(pt 2664 1136)
 	(bus)
@@ -3404,15 +3394,6 @@ agreement for further details.
 	(pt 2680 1136)
 	(pt 2784 1136)
 	(bus)
-)
-(connector
-	(pt 2728 912)
-	(pt 2680 912)
-)
-(connector
-	(text "conf[1]" (rect 2664 1046 2676 1112)(font "Liberation Sans" )(vertical))
-	(pt 2680 912)
-	(pt 2680 1136)
 )
 (connector
 	(pt 712 656)
@@ -3439,6 +3420,42 @@ agreement for further details.
 (connector
 	(pt 3008 800)
 	(pt 3008 1016)
+	(bus)
+)
+(connector
+	(pt 2728 928)
+	(pt 2680 928)
+)
+(connector
+	(text "conf[1]" (rect 2664 1046 2676 1112)(font "Liberation Sans" )(vertical))
+	(pt 2680 928)
+	(pt 2680 1136)
+)
+(connector
+	(pt 2728 912)
+	(pt 2664 912)
+)
+(connector
+	(text "conf[0]" (rect 2648 1038 2660 1104)(font "Liberation Sans" )(vertical))
+	(pt 2664 912)
+	(pt 2664 1136)
+)
+(connector
+	(pt 2728 896)
+	(pt 2704 896)
+)
+(connector
+	(pt 2704 896)
+	(pt 2704 984)
+)
+(connector
+	(pt 2728 880)
+	(pt 2568 880)
+	(bus)
+)
+(connector
+	(pt 2568 880)
+	(pt 2568 1368)
 	(bus)
 )
 (junction (pt 928 1352))
