@@ -64,6 +64,7 @@ Please refer to the [register map](/docs/register-map.org) for more information 
 **2018-11-16**: 
 * Bugfix DDS sin tables. Now looping back received I2S data in TX. Built jic-binary.
 	
-	
+**2018-12-17**:  
+* Now running on RX clock also in TX. Least significant bit in I2S left channel is now KEY in TX. Built jic-binary.
 	
 	

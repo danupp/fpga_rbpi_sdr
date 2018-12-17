@@ -128,10 +128,6 @@
 					"strict" : false
 				},
 				{
-					"name" : "SDA_TXD",
-					"strict" : false
-				},
-				{
 					"name" : "ADC_DBus[15]",
 					"strict" : false
 				},
@@ -196,6 +192,10 @@
 					"strict" : false
 				},
 				{
+					"name" : "SDA_TXD",
+					"strict" : false
+				},
+				{
 					"name" : "CODEC_SDA",
 					"strict" : false
 				},
@@ -208,11 +208,11 @@
 					"strict" : false
 				},
 				{
-					"name" : "PTTn",
+					"name" : "CODEC_SCLK",
 					"strict" : false
 				},
 				{
-					"name" : "CODEC_SCLK",
+					"name" : "PTTn",
 					"strict" : false
 				},
 				{
@@ -220,11 +220,11 @@
 					"strict" : false
 				},
 				{
-					"name" : "JP1",
+					"name" : "CODEC_FS",
 					"strict" : false
 				},
 				{
-					"name" : "CODEC_FS",
+					"name" : "JP1",
 					"strict" : false
 				},
 				{
@@ -233,6 +233,10 @@
 				},
 				{
 					"name" : "GPIO3",
+					"strict" : false
+				},
+				{
+					"name" : "KEYn",
 					"strict" : false
 				}
 			]

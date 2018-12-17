@@ -74,6 +74,13 @@ agreement for further details.
 		(line (pt 0 128)(pt 16 128)(line_width 1))
 	)
 	(port
+		(pt 0 144)
+		(input)
+		(text "key" (rect 0 0 15 12)(font "Arial" ))
+		(text "key" (rect 21 139 36 151)(font "Arial" ))
+		(line (pt 0 144)(pt 16 144)(line_width 1))
+	)
+	(port
 		(pt 240 32)
 		(output)
 		(text "audio_out_l[15..0]" (rect 0 0 68 12)(font "Arial" ))

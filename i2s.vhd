@@ -15,7 +15,8 @@ entity i2s_master is
 			lrclk : out std_logic;
 			dout : out std_logic;
 			din : in std_logic;
-			tx : in std_logic
+			tx : in std_logic;
+			key : in std_logic
 			);
 end i2s_master;
 
@@ -62,7 +63,7 @@ begin
 		if bclk'event and bclk = '0' then
 			if sample = '1' then
 				if tx = '1' then
-					data_reg_1 <= data_received_l;
+					data_reg_1 <= data_received_l(31 downto 1) & key;
 				elsif iqswap = '0' then
 					data_reg_1 <= I_data_in & "00000000";
 				else
