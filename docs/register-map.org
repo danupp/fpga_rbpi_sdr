@@ -20,7 +20,7 @@ Variable values are explained in the table further down.
 |      |  36 | reserved | reserved | reserved   |
 |      |  35 | reserved     | reserved | reserved   |
 |      |  34 | tx          | reserved | reserved   |
-|      |  33 | key         | reserved | reserved   |
+|      |  33 | key         | loopback | reserved   |
 |      |  32 | reserved          | iqswap | reserved   |
 |    1 |  31 | tx_att[1]      | reserved     | reserved   |
 |      |  30 | tx_att[0]    | reserved     | reserved   |
@@ -65,6 +65,7 @@ Variable values are explained in the table further down.
 | rx_att[1..0]:    | RX attenuation in steps of 6dB, 00: Full RX gain          														|
 | if_freq[2..0:    | 001: IF=45MHz, 010: IF=21.4MHz         																				|
 | iqswap            | 0: I -> I2S left, Q -> I2S right  1: Other way around - use if RF below LO etc.							|
+| loopback           | 0: Mic audio sent over I2S in TX  1: Received audio looped back in TX
 | freq[24..0]:      | Carrier frequency, in steps of 120e6/2^25 Hz                                                      |
 | audio gain[5..0]: | Speaker audio attenuation, 011111 = mute, 000000 = 0dB, MSB always 0 (see TLV320AIC20K datasheet) |
 

@@ -192,6 +192,13 @@ agreement for further details.
 		(text "i2s_iq_audio" (rect 147 315 195 327)(font "Arial" ))
 		(line (pt 216 320)(pt 200 320)(line_width 1))
 	)
+	(port
+		(pt 216 336)
+		(output)
+		(text "loopback" (rect 0 0 34 12)(font "Arial" ))
+		(text "loopback" (rect 161 331 195 343)(font "Arial" ))
+		(line (pt 216 336)(pt 200 336)(line_width 1))
+	)
 	(drawing
 		(rectangle (rect 16 16 200 352)(line_width 1))
 	)

@@ -208,14 +208,14 @@ begin
 			sign_A_sin_r <= sign_A_sin;
 			sign_A_sin_rr <= sign_A_sin_r;
 			if sign_A_cos_rr = '1' then
-				data_out_A_cos <= '1' & cos_raw_A;
+				data_out_A_cos <= '0' & cos_raw_A;
 			else
-				data_out_A_cos <= std_logic_vector('0' & not cos_raw_A);
+				data_out_A_cos <= std_logic_vector('1' & not cos_raw_A);
 			end if;
 			if sign_A_sin_rr = '1' then
-				data_out_A_sin <= '1' & sin_raw_A;
+				data_out_A_sin <= '0' & sin_raw_A;
 			else
-				data_out_A_sin <= std_logic_vector('0' & not sin_raw_A);
+				data_out_A_sin <= std_logic_vector('1' & not sin_raw_A);
 			end if;
 		end if;
 	end process;
@@ -226,9 +226,9 @@ begin
 			sign_B_r <= sign_B;
 			sign_B_rr <= sign_B_r;
 			if sign_B_rr = '1' then
-				data_out_B <= '1' & cos_raw_B;
+				data_out_B <= '0' & cos_raw_B;
 			else
-				data_out_B <= std_logic_vector('0' & not cos_raw_B);
+				data_out_B <= std_logic_vector('1' & not cos_raw_B);
 			end if;
 		end if;
 	end process;

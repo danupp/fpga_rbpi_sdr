@@ -27,7 +27,8 @@ entity setup_interface is
 			squelch : out std_logic_vector(5 downto 0);
 			twotone : out std_logic;
 			i2s_enable : out std_logic;
-			i2s_iq_audio : out std_logic
+			i2s_iq_audio : out std_logic;
+			loopback : out std_logic
 			);
 end setup_interface;
 
@@ -59,6 +60,7 @@ begin
 					if_freq <= data(25 downto 23);
 				elsif addr(7 downto 6) = "11" then
 					iqswap <= addr(0); 
+					loopback <= addr(1);
 					freq <= data(24 downto 0); --freq <= addr(5 downto 0) & data; 
 					clar <= data(31 downto 25);
 				elsif addr(7 downto 6) = "10" then

@@ -88,6 +88,13 @@ agreement for further details.
 		(line (pt 0 160)(pt 16 160)(line_width 1))
 	)
 	(port
+		(pt 0 176)
+		(input)
+		(text "loopback" (rect 0 0 34 12)(font "Arial" ))
+		(text "loopback" (rect 21 171 55 183)(font "Arial" ))
+		(line (pt 0 176)(pt 16 176)(line_width 1))
+	)
+	(port
 		(pt 240 32)
 		(output)
 		(text "audio_out_l[15..0]" (rect 0 0 68 12)(font "Arial" ))

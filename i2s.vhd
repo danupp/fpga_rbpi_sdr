@@ -3,6 +3,45 @@ use ieee.std_logic_1164.ALL;
 --use ieee.std_logic_unsigned.ALL;
 use ieee.numeric_std.ALL;
 
+entity audio_synch is
+	port (
+			audio_in : in std_logic_vector(15 downto 0);
+			codec_clk : in std_logic;
+			i2s_clk : in std_logic;
+			audio_out : out std_logic_vector(15 downto 0)
+			);
+end audio_synch;
+
+architecture arch of audio_synch is
+
+signal in_reg_1 : std_logic_vector(15 downto 0);
+
+begin
+
+sample : process(codec_clk)
+	begin
+		if codec_clk'event and codec_clk = '1' then
+			in_reg_1 <= audio_in;
+		end if;
+	end process;
+
+sample_i2s : process(i2s_clk)
+	begin
+		if i2s_clk'event and i2s_clk = '1' then
+			audio_out <= in_reg_1;
+		end if;
+	end process;
+
+end arch;
+
+
+
+
+library ieee;
+use ieee.std_logic_1164.ALL;
+--use ieee.std_logic_unsigned.ALL;
+use ieee.numeric_std.ALL;
+
 entity i2s_master is
 	port (clk0 : in std_logic;
 			sample_clk : in std_logic;
@@ -17,7 +56,8 @@ entity i2s_master is
 			dout : out std_logic;
 			din : in std_logic;
 			tx : in std_logic;
-			key : in std_logic
+			key : in std_logic;
+			loopback : in std_logic
 			);
 end i2s_master;
 
@@ -64,7 +104,11 @@ begin
 		if bclk'event and bclk = '0' then
 			if sample = '1' then
 				if tx = '1' then
-					data_reg_1 <= audio_in & "000000000000000" & key;
+					if loopback = '0' then
+						data_reg_1 <= audio_in & "000000000000000" & key;
+					else
+						data_reg_1 <= data_received_l(31 downto 1) & key;
+					end if;
 				elsif iqswap = '0' then
 					data_reg_1 <= I_data_in & "00000000";
 				else
@@ -83,7 +127,11 @@ begin
 				lrclk <= '1';
 				bitcount := 31;
 				if tx = '1' then
-					data_reg_1 <= data_received_r;
+					if loopback = '0' then
+						data_reg_1 <= audio_in & "000000000000000" & key;
+					else
+						data_reg_1 <= data_received_r(31 downto 1) & key;
+					end if;
 				elsif iqswap = '0' then
 					data_reg_1 <= Q_data_in & "00000000";
 				else

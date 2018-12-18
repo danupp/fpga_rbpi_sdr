@@ -18,10 +18,5 @@ conf
 15 cw_tx_nomod
 16 i2s_enable
 17 i2s_iq_audio
+18 loopback
 
-
-
-if_freq 000 - 50.45 MHz
-if_freq 001 - 45 MHz
-if_freq 010 - 21.4 MHz
-if_freq 011 - 10.7 MHz

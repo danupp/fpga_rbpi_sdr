@@ -69,3 +69,9 @@ Please refer to the [register map](/docs/register-map.org) for more information 
   
 **2018-12-17b**:  
 * Mic audio sent back in I2S left channel in TX.  
+  
+*2018-12-18**: 
+* Fixed proper signed cos/sin-tables and shift to unsigned in DAC driver. Solves bug with garbage in TX.  
+* Audio loopback in TX can now be selected by configuration bit. (See register map.)
+* LSB in both I2S left and right is now key in TX.
+* Added better clock synch between codec and i2s for mic audio.

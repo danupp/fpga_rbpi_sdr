@@ -45,14 +45,14 @@ SELECTIQ <= A_clk;
 				A_clk <= '1';
 				B_clk <= '0';
 				if tx = '0' then
-					DA <= A_data_rx;
+					DA <= not A_data_rx(13) & A_data_rx(12 downto 0);
 				else
-					DA <= A_data_tx;
+					DA <= not A_data_tx(13) & A_data_tx(12 downto 0);
 				end if;
 			else
 				A_clk <= '0';
 				B_clk <= '1';
-				DA <= B_data;
+				DA <= not B_data(13) & B_data(12 downto 0);
 			end if;
 			sel := not sel;
 		end if;

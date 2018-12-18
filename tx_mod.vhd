@@ -69,7 +69,7 @@ signal ms0a, ms0b : signed(13 downto 0);
 
 begin					
 		
-	Mod_data_out <= std_logic_vector(mixsum_sig)(25 downto 12);  -- 14 bits of 28, shifted 1 bit for mult by LO and 1 bit for conv loss compensation	
+	Mod_data_out <= std_logic_vector(mixsum_sig)(27 downto 14);  -- Old 25 downto 12: 14 bits of 28, shifted 1 bit for mult by LO and 1 bit for conv loss compensation	
 	
 	p0 : process (clk_in)
 		
